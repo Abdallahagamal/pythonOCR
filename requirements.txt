@@ -2,3 +2,4 @@ Flask
 PyJWT
 opencv-python
 Pillow
+requests
