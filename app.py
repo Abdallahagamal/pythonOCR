@@ -31,6 +31,7 @@ def get_extractor():
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        print("[DEBUG] Incoming headers:", dict(request.headers))
         auth = request.headers.get("Authorization", "")
         if not auth.startswith("Bearer "):
             return jsonify({"message": "Token is missing"}), 401
