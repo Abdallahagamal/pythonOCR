@@ -1,15 +1,32 @@
 from flask import Flask, request, jsonify
 from functools import wraps
 import jwt
-import base64
 import os
 import tempfile
-from main import extract_client
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+extract_client = None
+extractor_error = None
 
 # Same secret key your .NET uses to sign JWT
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "bO2dwe4+iEWyV2ntlMbCuf3SdNV4hW63v4EsEo3ovec=")
+
+
+def get_extractor():
+    global extract_client
+    global extractor_error
+    if extract_client is not None:
+        return extract_client
+    if extractor_error is not None:
+        raise RuntimeError(extractor_error)
+    try:
+        from main import extract_client as extractor
+        extract_client = extractor
+        return extract_client
+    except Exception as ex:
+        extractor_error = f"Extractor initialization failed: {ex}"
+        raise RuntimeError(extractor_error)
 
 def token_required(f):
     @wraps(f)
@@ -39,6 +56,11 @@ def health():
     return jsonify({"status": "ok"}), 200
 
 
+@app.route("/", methods=["GET"])
+def root():
+    return jsonify({"status": "ok", "service": "python-ocr"}), 200
+
+
 @app.route("/extract", methods=["POST"])
 @token_required
 def extract_route():
@@ -55,11 +77,13 @@ def extract_route():
         return jsonify({"message": "Only JPG and PNG allowed"}), 400
 
     # Save temporarily, process, then delete
-    temp_path = os.path.join(tempfile.gettempdir(), file.filename)
+    safe_name = secure_filename(file.filename) or "upload.jpg"
+    temp_path = os.path.join(tempfile.gettempdir(), safe_name)
     file.save(temp_path)
 
     try:
-        result = extract_client(temp_path)
+        extractor = get_extractor()
+        result = extractor(temp_path)
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"message": "Failed to process image", "error": str(e)}), 500
