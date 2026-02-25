@@ -1,5 +1,5 @@
 Flask
+requests
 PyJWT
 opencv-python
 Pillow
-requests
