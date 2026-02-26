@@ -34,8 +34,10 @@ def token_required(f):
         print("[DEBUG] Incoming headers:", dict(request.headers))
         auth = request.headers.get("Authorization", "")
         if not auth:
-                # Vercel proxy sends JWT as X-Vercel-Proxy-Signature
-                auth = request.headers.get("X-Vercel-Proxy-Signature", "")
+            # Vercel proxy sends JWT as X-Vercel-Oidc-Token
+            auth = request.headers.get("X-Vercel-Oidc-Token", "")
+            if auth:
+                auth = f"Bearer {auth}"
         print("[DEBUG] Received token:", auth)
         if not auth.startswith("Bearer "):
             return jsonify({
