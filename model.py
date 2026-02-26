@@ -1,6 +1,6 @@
 import requests
 
-OPENROUTER_API_KEY = "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"  # replace with your key
+OPENROUTER_API_KEY = "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"  # replace with your key
 
 
 # Fallback chain — tried in order if rate-limited or unavailable
