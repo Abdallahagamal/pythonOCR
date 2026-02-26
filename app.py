@@ -33,6 +33,9 @@ def token_required(f):
     def decorated(*args, **kwargs):
         print("[DEBUG] Incoming headers:", dict(request.headers))
         auth = request.headers.get("Authorization", "")
+            if not auth:
+                # Vercel proxy sends JWT as X-Vercel-Proxy-Signature
+                auth = request.headers.get("X-Vercel-Proxy-Signature", "")
         if not auth.startswith("Bearer "):
             return jsonify({
                 "message": "Token is missing",
