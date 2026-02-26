@@ -34,7 +34,10 @@ def token_required(f):
         print("[DEBUG] Incoming headers:", dict(request.headers))
         auth = request.headers.get("Authorization", "")
         if not auth.startswith("Bearer "):
-            return jsonify({"message": "Token is missing"}), 401
+            return jsonify({
+                "message": "Token is missing",
+                "headers": dict(request.headers)
+            }), 401
         token = auth.split(" ")[1]
         try:
             secret = SECRET_KEY.encode("ascii")  # ← matches Encoding.ASCII.GetBytes()
