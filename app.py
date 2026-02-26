@@ -72,7 +72,6 @@ def root():
 
 
 @app.route("/extract", methods=["POST"])
-@token_required
 def extract_route():
     if "image" not in request.files:
         return jsonify({"message": "No file provided. Use key 'image'"}), 400
