@@ -36,6 +36,7 @@ def token_required(f):
         if not auth:
                 # Vercel proxy sends JWT as X-Vercel-Proxy-Signature
                 auth = request.headers.get("X-Vercel-Proxy-Signature", "")
+        print("[DEBUG] Received token:", auth)
         if not auth.startswith("Bearer "):
             return jsonify({
                 "message": "Token is missing",
