@@ -4,6 +4,8 @@ import base64
 import requests
 import os
 
+from ocr import clean_text, extract_header_name, extract_phone, ocr_image
+
 OPENROUTER_API_KEY = "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"
 
 VISION_MODELS = [
@@ -12,7 +14,6 @@ VISION_MODELS = [
     "qwen/qwen2.5-vl-72b-instruct:free",
     "google/gemma-3-27b-it:free",
     "mistralai/mistral-small-3.1-24b-instruct:free",
-    "moonshotai/kimi-vl-a3b-thinking:free",
 ]
 
 PROMPT = """This is a Facebook Messenger screenshot from a business gym/fitness inbox.
@@ -113,6 +114,73 @@ def normalize_phone(raw):
     return m.group() if m else raw
 
 
+def infer_gender(name):
+    if not name or name == "unknown":
+        return "unknown"
+
+    lower_name = name.strip().lower()
+    female_suffixes = ("ة", "ى", "ين", "نور", "لين", "ريم", "سلمى", "بسمة", "هان")
+    if any(lower_name.endswith(suffix) for suffix in female_suffixes):
+        return "female"
+
+    female_names = {
+        "maya", "sara", "sarah", "mona", "nour", "noor", "reem", "raneem",
+        "fatma", "fatima", "nada", "aya", "yara", "lana", "lina", "leen",
+    }
+    first_token = re.split(r"\s+", lower_name)[0]
+    if first_token in female_names:
+        return "female"
+
+    return "male"
+
+
+def infer_contact_method(text, phone):
+    lowered = text.lower()
+    if any(keyword in lowered for keyword in ("واتساب", "واتس اب", "whatsapp")):
+        return "WhatsApp"
+    if any(keyword in lowered for keyword in ("مكالمة", "call")):
+        return "Call"
+    if phone:
+        return "WhatsApp or Call"
+    return "unknown"
+
+
+def infer_branch(text):
+    branch_keywords = [
+        "الشروق",
+        "المقطم",
+        "مصر الجديدة",
+        "التجمع",
+        "مدينة نصر",
+        "الشيخ زايد",
+        "6 أكتوبر",
+        "الرحاب",
+        "المعادي",
+    ]
+
+    for branch in branch_keywords:
+        if branch in text:
+            return branch
+
+    return "unknown"
+
+
+def ocr_fallback(image_path):
+    raw_text = clean_text(ocr_image(image_path))
+    client_name = extract_header_name(raw_text) or "unknown"
+    client_phone = extract_phone(raw_text)
+    if client_phone:
+        client_phone = normalize_phone(client_phone)
+
+    return {
+        "client_name": client_name,
+        "client_phone": client_phone or "unknown",
+        "gender": infer_gender(client_name),
+        "contact_method": infer_contact_method(raw_text, client_phone),
+        "branch": infer_branch(raw_text),
+    }
+
+
 def extract_client(image_path):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -149,7 +217,8 @@ def extract_client(image_path):
             print(f"[model] Failed: {e} — trying next...")
             last_error = e
 
-    return {"error": f"All models failed. Last: {last_error}"}
+    print(f"[ocr] Falling back to local OCR after model failures: {last_error}")
+    return ocr_fallback(image_path)
 
 
 if __name__ == "__main__":
