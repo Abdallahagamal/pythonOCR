@@ -4,7 +4,7 @@ import base64
 import requests
 import os
 
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 
 VISION_MODELS = [
     "openrouter/auto",
