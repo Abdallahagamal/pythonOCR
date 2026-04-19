@@ -7,12 +7,11 @@ import os
 OPENROUTER_API_KEY = "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"
 
 VISION_MODELS = [
-    "openrouter/auto",
+    "google/gemini-2.0-flash-exp:free",
+    "google/gemini-2.5-pro-exp-03-25:free", 
     "meta-llama/llama-4-maverick:free",
     "qwen/qwen2.5-vl-72b-instruct:free",
-    "google/gemma-3-27b-it:free",
     "mistralai/mistral-small-3.1-24b-instruct:free",
-    "moonshotai/kimi-vl-a3b-thinking:free",
 ]
 
 PROMPT = """This is a Facebook Messenger screenshot from a business gym/fitness inbox.
