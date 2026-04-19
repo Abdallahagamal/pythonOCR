@@ -1,8 +1,15 @@
 # Stage 1: Base image
 FROM python:3.10-slim
 
-# Install Tesseract OCR for pytesseract on Linux containers.
+# Install OpenCV and Tesseract runtime libraries for Linux containers.
 RUN apt-get update && apt-get install -y --no-install-recommends \
+	libxcb1 \
+	libx11-6 \
+	libxext6 \
+	libxrender1 \
+	libsm6 \
+	libgl1 \
+	libglib2.0-0 \
 	tesseract-ocr \
 	tesseract-ocr-ara \
 	tesseract-ocr-eng \

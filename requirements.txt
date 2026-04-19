@@ -1,6 +1,6 @@
 Flask
 requests
 PyJWT
-opencv-python
+opencv-python-headless
 Pillow
 pytesseract
