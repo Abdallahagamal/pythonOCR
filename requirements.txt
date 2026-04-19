@@ -3,3 +3,4 @@ requests
 PyJWT
 opencv-python
 Pillow
+pytesseract

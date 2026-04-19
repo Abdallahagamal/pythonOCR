@@ -1,6 +1,13 @@
 # Stage 1: Base image
 FROM python:3.10-slim
 
+# Install Tesseract OCR for pytesseract on Linux containers.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	tesseract-ocr \
+	tesseract-ocr-ara \
+	tesseract-ocr-eng \
+	&& rm -rf /var/lib/apt/lists/*
+
 # Set working directory
 WORKDIR /app
 

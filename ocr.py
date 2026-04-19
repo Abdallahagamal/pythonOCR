@@ -1,11 +1,33 @@
-import pytesseract
 import cv2
 import numpy as np
 import re
+import os
+
+try:
+    import pytesseract
+except ImportError as exc:
+    pytesseract = None
+    _PYTESSERACT_IMPORT_ERROR = exc
+else:
+    _PYTESSERACT_IMPORT_ERROR = None
+
+
+def _configure_tesseract_cmd():
+    if pytesseract is None:
+        raise RuntimeError(f"pytesseract is not installed: {_PYTESSERACT_IMPORT_ERROR}")
+
+    configured_path = os.getenv("TESSERACT_CMD")
+    if configured_path:
+        pytesseract.pytesseract.tesseract_cmd = configured_path
+        return
+
+    windows_default = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if os.name == "nt" and os.path.exists(windows_default):
+        pytesseract.pytesseract.tesseract_cmd = windows_default
 
 
 def ocr_image(image_path):
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    _configure_tesseract_cmd()
 
     img = cv2.imread(image_path)
 
