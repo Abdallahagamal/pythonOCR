@@ -12,6 +12,7 @@ VISION_MODELS = [
     "google/gemini-2.5-pro-exp-03-25:free", 
     "meta-llama/llama-4-maverick:free",
     "qwen/qwen2.5-vl-72b-instruct:free",
+    "google/gemma-4-26b-a4b-it:free",
 ]
 
 PROMPT = """This is a Facebook Messenger screenshot from a business gym/fitness inbox.
